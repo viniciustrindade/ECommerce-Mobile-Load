@@ -1,0 +1,17 @@
+{
+  "name": "ECommerce-Mobile-Load",
+  "version": "1.0.0",
+  "description": "Script to generate mobile beacons for Ecommerce demo app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rbolton@appdynamics.com",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^3.10.1",
+    "q": "^1.4.1",
+    "request": "^2.65.0",
+    "winston": "^2.0.0"
+  }
+}
