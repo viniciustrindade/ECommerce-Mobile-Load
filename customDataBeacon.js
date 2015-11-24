@@ -38,3 +38,51 @@ exports.getStartTimer = function() {
         "type": "timer"
     }
 }
+
+exports.getAndroidInfoPoint = function() {
+    return {
+        "dmo":"Kindle Fire",
+        "dm":"Amazon",
+        "av":"2.0",
+        "avi":15,
+        "ca":"AT&T",
+        "osv":"Android 4.2",
+        "geo":"Jordan",
+        "groupId":"gid-4",
+        "jailBroken":"true",
+        "agentId":"agent-id-44",
+        "userdata":{"Item Purchased":"Pizza","Toppings":"Lotsa-Mottsa"},
+        "type":"method-call",
+        "st":1448046450000,
+        "et":1448046454449,
+        "mid":{
+            "cls":"com.example.Class",
+            "mth":"method",
+            "icm":false,
+            "ruleName":"add to shopping cart"
+        },
+        "args":["1014453496","0.46631253","_Gy`Qy"],
+        "ret":"-1968667546"
+    };
+}
+
+exports.getiOSInfoPoint = function() {
+    return {
+        "dmo":"iPhone5,1",
+        "dm":"Apple",
+        "av":"1.0",
+        "avi":10,
+        "ca":"Verizon",
+        "osv":"iOS 5.1",
+        "geo":"Jordan",
+        "groupId":"gid-7",
+        "jailBroken":"true",
+        "agentId":"agent-id-77",
+        "type":"method-call",
+        "st":1448046447002,
+        "et":1448046450748,
+        "mid":{"cls":"ECommerce","mth":"processLogin:","icm":false,"ruleName":"image downloads"},
+        "args":["-140854678","0.9124946","dcab666"],
+        "ret":"0.91552484"
+    };
+}

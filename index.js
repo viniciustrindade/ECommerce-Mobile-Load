@@ -55,6 +55,7 @@ var session = function(sessionData) {
         winston.info('New session start');
         var appStartBeacon = getAppStartBeacon(sessionData);
         winston.info('App start beacon', appStartBeacon);
+        sendBeacon([getInfoPoint(sessionData)], sessionData);
         sendBeacon([appStartBeacon, customDataBeacon.getStartTimer()], sessionData).then(function(beaconPost) {
             if (beaconPost.response.statusCode === 200) {
                 winston.info('App start beacon posted successfully');
@@ -119,6 +120,35 @@ var getPages = function() {
         { url : serverHost + '/appdynamicspilot/rest/cart/1', getPage : getPage, processPage : processPage},
         { url : serverHost + '/appdynamicspilot/rest/cart/co', getPage : getCheckout, processPage : processPage}
     ];
+}
+
+var getInfoPointClass = function() {
+    var iOSData = [
+        {"cls":"ECommerce","mth":"processLogin:"},
+        {"cls":"ECommerceCart","mth":"processOrder:"},
+        {"cls":"ECommerceCart","mth":"addToCart:"},
+        {"cls":"ECommerceCatalog","mth":"fetchCatalog:"},
+    ];
+
+    var androidData = [
+        {"cls":"com.ecommerce.Login", "mth":"doLogin"},
+        {"cls":"com.ecommerce.Cart", "mth":"processOrder"},
+        {"cls":"com.ecommerce.Cart", "mth":"addToCart"},
+        {"cls":"com.ecommerce.Catalog", "mth":"fetchCatalog"},
+    ];
+    return (mobilePlatform === 'iOS') ? iOSData[_.random(0,(iOSData.length -1))] : androidData[_.random(0,(androidData.length -1))] ;
+}
+
+var getInfoPoint = function(sessionData) {
+    var infoPoint = (mobilePlatform === 'iOS') ? customDataBeacon.getiOSInfoPoint() : customDataBeacon.getAndroidInfoPoint();
+    var infoTs =  Date.now()
+    infoPoint.st = infoTs - _.random(150,450);
+    infoPoint.et = infoTs;
+    infoPoint.agentId = sessionData.info.agentId;
+    var classInfo = getInfoPointClass();
+    infoPoint.mid.cls = classInfo.cls;
+    infoPoint.mid.mth = classInfo.mth;
+    return infoPoint;
 }
 
 var getLogin = function(sessionData) {
