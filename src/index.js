@@ -23,7 +23,7 @@ if (mobilePlatform === 'iOS') {
     var crashBeacon = require('./androidCrashBeacon');
 }
 var uiHost = 'http://www.ecommerce.com';
-var appName = mobilePlatform === 'iOS' ? 'com.appdynamics.EcommSess' : 'com.appdynamics.pmdemoapps.EcommSess';
+var appName = mobilePlatform === 'iOS' ? 'com.appdynamics.Ecommerce-iOS' : 'com.appdynamics.pmdemoapps.EcommAndroid';
 if (process.env.APP_NAME) {
     appName = process.env.APP_NAME;
 }
