@@ -25,23 +25,23 @@ exports.getBeacon = function() {
         },
         "bcs": [
             {
-                "text": 'Cart Item View',
+                "text": 'ChangeAddressView',
                 "ts": 1443104460535
             },
             {
-                "text": 'Detailed Item View',
+                "text": 'SettingsView',
                 "ts": 1443104463476
             },
             {
-                "text": 'Item List View',
+                "text": 'CartView',
                 "ts": 1443104460419
             },
             {
-                "text": 'Settings View',
+                "text": 'ListView',
                 "ts": 1443104460572
             },
             {
-                "text": 'App Launched',
+                "text": 'LoginView',
                 "ts": 1443104460700
             }
         ],
@@ -185,3 +185,4 @@ exports.getBeacon = function() {
     };
 
 }
+

@@ -14,29 +14,25 @@ exports.getBeacon = function() {
     "tm": "989",
     "cc": "2",
     "ab": '3861444463b35dce6e4b16e930e05a39ebc4a323',
-    "userdata": {
-      "User Email": "rlbolton12@aol.com",
-      "User Name": "rlbolton"
-    },
     "bcs": [
       {
-        "text": 'Cart Item View',
+        "text": 'ChangeAddressView',
         "ts": 1443104460535
       },
       {
-        "text": 'Detailed Item View',
+        "text": 'SettingsView',
         "ts": 1443104463476
       },
       {
-        "text": 'Item List View',
+        "text": 'CartView',
         "ts": 1443104460419
       },
       {
-        "text": 'Settings View',
+        "text": 'ListView',
         "ts": 1443104460572
       },
       {
-        "text": 'App Launched',
+        "text": 'LoginView',
         "ts": 1443104460700
       }
     ],
