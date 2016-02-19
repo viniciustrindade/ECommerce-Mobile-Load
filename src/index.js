@@ -29,10 +29,9 @@ if (process.env.APP_NAME) {
 }
 var debugConsole = process.env.DEBUG_CONSOLE || false;
 var consoleLevel = process.env.CONSOLE_LOG_LEVEL || 'info';
-var logFilePath = process.env.LOG_PATH || (process.cwd().indexOf('src') !== -1) ? '../logs/' : 'logs/';
-var logFileLevel =  process.env.LOG_LEVEL || 'debug';
+var logFilePath = process.env.LOG_PATH || ((process.cwd().indexOf('src') !== -1) ? '../logs/' : 'logs/');
+var logFileLevel =  process.env.LOG_LEVEL || 'info';
 var logFileName = serverHost.replace('http://','') + '-' + process.pid + '-' + Date.now() + '.log';
-var slowCheckoutTs = 0;
 
 /*******************************
  * Screens
@@ -65,6 +64,8 @@ var getScreens = function() {
         }
     ];
 };
+var userSessionFlagged = false;
+
 /*******************************
  * Basic error checking/logging
  *******************************/
@@ -93,6 +94,7 @@ logger.log('info', 'Load script start', {
     appDKey :  process.env.EUM_KEY,
     serverHost : process.env.ECOMM_URL,
     mobilePlatform : process.env.PLATFORM,
+    appName : appName,
     debugConsole : debugConsole,
     consoleLevel : consoleLevel,
     logFilePath : logFilePath,
@@ -112,11 +114,12 @@ var session = function(sessionData) {
         sessionData = {
             screens: getScreens(),
             currentScreen: null,
-            info: getInfo()
+            info: getInfo(),
+            userdata : getUserData()
         }
 
         //introduce checkout crash and new steps
-        if (_.random(0,100) < 5) {
+        if (_.random(0,100) < 8) {
             sessionData.screens.splice(3,0,{name : 'SettingsView'});
             sessionData.screens.splice(4,0,{name : 'ChangeAddressView', infoPoint : {infoClass : 'Settings', infoMethod : 'changeBillingAddress'}});
             sessionData.screens[5].crash = true;
@@ -144,17 +147,6 @@ var session = function(sessionData) {
         sessionData.screens.shift();
         sendBeacon([getRootViewChangeBeacon(sessionData, sessionData.currentScreen.name)], sessionData, 'Screen Change');
 
-        if (!_.isUndefined(sessionData.currentScreen.crash)) {
-            setTimeout(function() {
-                var cb = updateCrashBeacon(sessionData, crashBeacon.getBeacon());
-                sendBeacon([cb], sessionData, 'Crash Report');
-            },600);
-            setTimeout(function() {
-                session();
-            }, _.random(2000,4000));
-            return;
-        }
-
         if (!_.isUndefined(sessionData.currentScreen.network)) {
 
             var st = Date.now();
@@ -167,16 +159,33 @@ var session = function(sessionData) {
                 var beacon = getNetworkRequestBeacon(sessionData, correlationInfo);
 
                 var ms = Date.now() - st;
-                //if (sessionData.currentScreen.name === 'CheckoutView' && correlationInfo.fullSnapshot === true && ms > 5000 && Date.now() > (slowCheckoutTs + (60000 * 1))) {
-                if (correlationInfo.fullSnapshot === true && ms > 2000 && Date.now() > (slowCheckoutTs + (60000 * 20))) {
-                    beacon.userdata  = {
-                        UserId : 'ROB-BOL99'
+                //add userData to session
+                if (sessionData.currentScreen.name === 'CheckoutView' ) {
+                    beacon.userdata = sessionData.userdata;
+                    if (correlationInfo.fullSnapshot === true && ms > 2000 && userSessionFlagged !== true) {
+                        beacon.userdata.email = 'kyle.duffy@aol.com';
+                        beacon.userdata.username = 'kduffy';
+                        userSessionFlagged = true;
+                        setTimeout(function() {
+                            userSessionFlagged = false;
+                        }, 900000);
                     }
-                    slowCheckoutTs = Date.now();
                 }
 
                 sendBeacon([beacon], sessionData, 'Network Request').then(function() {
                     setTimeout(function() {
+
+                        if (!_.isUndefined(sessionData.currentScreen.crash)) {
+                            setTimeout(function() {
+                                var cb = updateCrashBeacon(sessionData, crashBeacon.getBeacon());
+                                sendBeacon([cb], sessionData, 'Crash Report');
+                            },6000);
+                            setTimeout(function() {
+                                session();
+                            }, _.random(2000,4000));
+                            return;
+                        }
+
                         session(sessionData);
                     }, _.random(2000,4000));
                 });
@@ -351,6 +360,7 @@ var getJSessionId = function(headers) {
 }
 
 var getCorrelationInfo = function(headers) {
+
     var c = {
         fullSnapshot : false
     };
@@ -366,11 +376,15 @@ var getCorrelationInfo = function(headers) {
     if (headers['adrum_2']) {
         c.btERT =  headers['adrum_2'].split(':')[1];
     }
-    if (headers['adrum_3']) {
-        var snapshot =  headers['adrum_3'].split(':')[1];
-        if (snapshot === 'f') {
-            c.fullSnapshot = true;
-        }
+    if (headers['adrum_3'] || headers['adrum4']) {
+        [headers['adrum_3'],headers['adrum_4']].forEach(function(value) {
+            if (value) {
+                var split = value.split(':');
+                if (split[0] === 'serverSnapshotType') {
+                    c.fullSnapshot = true;
+                }
+            }
+        });
     }
     return c;
 }
@@ -418,10 +432,25 @@ var getInfo = function() {
     };
 };
 
+var firstNames = ['rob','eric','gabriella','jeff','alex','tom','lori','michelle'];
+var lastNames = ['bolton','querales','johanson','morgan','rabaut','fedotyev'];
+var emailProviders = ['aol','hotmail','yahoo','gmail'];
+
+var getUserData = function() {
+
+    var firstName = _.sample(firstNames);
+    var lastName = _.sample(lastNames);
+    var email = firstName + '.' + lastName + '@' + _.sample(emailProviders) + '.com';
+    return {
+        email : email,
+        username : firstName + lastName + _.random(0,10)
+    }
+
+}
+
 var getAppStartBeacon = function(sessionData) {
     var beacon = getDefaultAppStartBeacon();
     updateStandardBeaconProps(beacon,sessionData);
-    beacon.userdata.Id = _.random(10,99) + 'ASD-RB' + _.random(10000,99999);
     return beacon;
 }
 
@@ -457,7 +486,12 @@ var getDefaultAppStartBeacon = function() {
 var getRootViewChangeBeacon = function(sessionData, viewName) {
     var beacon = getDefaultRootviewChange();
     updateStandardBeaconProps(beacon,sessionData);
-    beacon.rootView = viewName;
+    if (mobilePlatform === 'iOS') {
+        beacon.rootView = viewName;
+    } else {
+        beacon.event = 'Activity Change';
+        beacon.activity = viewName;
+    }
     return beacon;
 }
 
@@ -572,6 +606,7 @@ var getDefaultNetworkRequestBeacon = function() {
         "jailBroken": "false",
         "agentId": "agent-id-55",
         "bts": [],
+        "userdata" : {},
         "userdataLong": {},
         "userdataDouble": {},
         "userdataBoolean": {},

@@ -19,10 +19,6 @@ exports.getBeacon = function() {
         "ca": "${CARRIER}",
         "ct": '${CONNTYPE}',
         "bid":"66ce9cb5a13f7436fb21b39c6c6c8fb7",
-        "userdata": {
-            "User Email": "rlbolton12@aol.com",
-            "User Name": "rlbolton"
-        },
         "bcs": [
             {
                 "text": 'ChangeAddressView',
